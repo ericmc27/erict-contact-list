@@ -1,3 +1,5 @@
+import { json } from "react-router";
+
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
@@ -19,10 +21,22 @@ const getState = ({ getStore, getActions, setStore }) => {
 			exampleFunction: () => {
 				getActions().changeColor(0, "green");
 			},
-			loadSomeData: () => {
-				/**
-					fetch().then().then(data => setStore({ "foo": data.bar }))
-				*/
+			findSlug: async() => {
+					// const store = getStore()
+					// const agenda = "https://playground.4geeks.com/contact/agendas/Eric"
+					// const response = await (await fetch(agenda)).json()
+					// if(!response.slug){
+					// 	await getActions().createSlug(agenda)
+					// 	await getActions.findSlug()
+					// }
+					// setStore({...store, userAgenda:response})
+			},
+			createSlug: async(agenda)=>{
+				let name = agenda.split('/')
+				name = name[name.length-1]
+				await fetch(agenda, {method: "POST",
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({slug:`${name}`})})
 			},
 			changeColor: (index, color) => {
 				//get the store
