@@ -1,57 +1,46 @@
-import { json } from "react-router";
+import { removeContact } from "../apis/removeContact";
 
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
+			visiblePopUp: null
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
+			setVisiblePopUpId: (id)=>{
+				const store = getStore()
+				setStore({...store, visiblePopUp: id})
 			},
-			findSlug: async() => {
-					// const store = getStore()
-					// const agenda = "https://playground.4geeks.com/contact/agendas/Eric"
-					// const response = await (await fetch(agenda)).json()
-					// if(!response.slug){
-					// 	await getActions().createSlug(agenda)
-					// 	await getActions.findSlug()
-					// }
-					// setStore({...store, userAgenda:response})
+			resetVisiblePopUpId: ()=>{
+				const store = getStore()
+				setStore({...store, visiblePopUp: null})
 			},
-			createSlug: async(agenda)=>{
-				let name = agenda.split('/')
-				name = name[name.length-1]
-				await fetch(agenda, {method: "POST",
-					headers: {'Content-Type': 'application/json'},
-					body: JSON.stringify({slug:`${name}`})})
+			deleteCurrentContact: ()=>{
+				const store = getStore()
+				removeContact(store.visiblePopUp, getActions(), store, setStore)
 			},
-			changeColor: (index, color) => {
-				//get the store
-				const store = getStore();
-
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
-				});
-
-				//reset the global store
-				setStore({ demo: demo });
-			}
+			changeValue: (e, id)=>{
+				const store = getStore()
+				const currentContact = store.userAgenda.contacts.findIndex((contact)=>contact.id===id)
+				store.userAgenda.contacts[currentContact][e.target.name] = e.target.value
+			},
+			getSingleAgenda: async () => {
+				const store = getStore()
+				const agenda = "https://playground.4geeks.com/contact/agendas/Eric"
+				let response = await (await fetch(agenda)).json()
+				if (!response.slug) {
+					const newAgenda = await getActions().createSingleAgenda(agenda)
+					setStore({ ...store, userAgenda: newAgenda })
+					return
+				}
+				setStore({ ...store, userAgenda: response })
+			},
+			createSingleAgenda: async (agenda) => {
+				await fetch(agenda, {
+					method: "POST",
+					headers: { 'Content-Type': 'application/json' }
+				})
+			},
 		}
 	};
 };
